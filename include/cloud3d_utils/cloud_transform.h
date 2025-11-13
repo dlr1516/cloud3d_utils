@@ -113,6 +113,17 @@ void addRandomPointsCloud(const PointCloudType::ConstPtr& cloudIn,
                           PointCloudType::Ptr& cloudOut);
 
 /**
+ * @brief Rescales the input point cloud to fit a given size.
+ *
+ * @param cloudIn   the input point cloud
+ * @param scale     the desired maximum size of the point cloue
+ * @param cloudOut  the rescaled point cloud
+ */
+void rescaleCloud(const PointCloudType::ConstPtr& cloudIn,
+                  double scale,
+                  PointCloudType::Ptr& cloudOut);
+
+/**
  * @brief Returns a resampled point cloud.
  *
  * @param cloudIn the input point cloud

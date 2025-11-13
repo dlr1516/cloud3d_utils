@@ -345,6 +345,27 @@ void addRandomPointsCloud(const PointCloudType::ConstPtr& cloudIn,
     }
 }
 
+void rescaleCloud(const PointCloudType::ConstPtr& cloudIn,
+                  double scale,
+                  PointCloudType::Ptr& cloudOut) {
+    float sx, sy, sz, smax;
+
+    PointType pointMin, pointMax;
+    pcl::getMinMax3D(*cloudIn, pointMin, pointMax);
+    sx = pointMax.x - pointMin.x;
+    smax = sx;
+    sy = pointMax.y - pointMin.y;
+    if (sy > smax)
+        smax = sy;
+    sz = pointMax.z - pointMin.z;
+    if (sz > smax)
+        smax = sz;
+
+    float scaleFactor = (float)(scale / smax);
+    pcl::transformPointCloud(*cloudIn, *cloudOut, Eigen::Vector3f::Zero(),
+                             Eigen::Quaternionf::Identity(), scaleFactor);
+}
+
 void sampleCloud(const PointCloudType::ConstPtr& cloudIn,
                  int num,
                  PointCloudType::Ptr& cloudOut) {

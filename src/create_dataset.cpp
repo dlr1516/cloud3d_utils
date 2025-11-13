@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     cloud3d_utils::PointCloudType::Ptr cloudOut(
         new cloud3d_utils::PointCloudType);
     cloud3d_utils::CloudMetadata cloudData;
-    float radius, translMax;
+    float radius, scale, translMax;
     int num, cloudOutNum;
     bool outPly, outPcd, outCsv;
     std::string formats, transformAxes;
@@ -50,6 +50,7 @@ int main(int argc, char** argv) {
     params.getParam<std::string>("out", filenameOut, "");
     params.getParam<std::string>("dirOut", dirOut, "");
     params.getParam<float>("radius", radius, 0.001f);
+    params.getParam<float>("scale", scale, 1.0f);
     params.getParam<int>("num", num, 1000);
     params.getParam<int>("cloudOutNum", cloudOutNum, 2);
     params.getParam<float>("transfMax", cloudData.translationMax, 1.0f);
@@ -93,7 +94,7 @@ int main(int argc, char** argv) {
         formatsTmp.push_back(tmpS);
         // cloudData.formats.push_back(tmpS);
     }
-    // cloudData.formats = formatsTmp;
+    cloudData.formats = formatsTmp;
     //  Splits the formats into a list of formats
     boost::tokenizer<boost::char_separator<char> > tokensAxes(transformAxes,
                                                               sep);
@@ -167,6 +168,8 @@ int main(int argc, char** argv) {
     for (int i = 0; i < cloudFilenames.size(); ++i) {
         int ret = cloud3d_utils::readCloud(cloudFilenames[i], *cloudIn);
         if (ret >= 0) {
+            cloud3d_utils::rescaleCloud(cloudIn, scale, cloudSampled);
+            cloudIn->swap(*cloudSampled);
             cloud3d_utils::sampleCloud(cloudIn, num, cloudSampled);
             std::cout << "processing \"" << cloudFilenames[i]
                       << "\": downsampled from " << cloudIn->size() << " to "
@@ -248,6 +251,8 @@ void createAndSave(cloud3d_utils::PointCloudType::Ptr& cloudOut,
             .addRandomPointsCloud(cloudOut, cloudData.occlusionPerc, cloudTmp);
         cloudOut->swap(*cloudTmp);
     }
+    std::cout << "Saving output clouds in " << cloudData.formats.size()
+              << " formats" << std::endl;
     // Saves the cloud in the required file formats
     std::string filenameOut = cloudData.getName();
     for (auto& format : cloudData.formats) {
